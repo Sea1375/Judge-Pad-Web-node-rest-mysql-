@@ -112,6 +112,106 @@ module.exports = (express, connection) => {
 	    });
 	//end route
 
+	// http://www.restapitutorial.com/lessons/httpmethods.html
+	// POST - Create
+	// GET - Read
+	// PUT - Update/Replace - AKA you pass all the data to the update
+	// PATCH - Update/Modify - AKA you just pass the changes to the update
+	// DELETE - Delete
+
+	// COLLECTION ROUTES
+	router.route('/auth/:id')
+		//we can use .route to then hook on multiple verbs
+		.post((req, res) => {
+			const data = req.body;
+			const reqId = req.params.id;
+			console.log(data);
+			const query = connection.query('SELECT * FROM authentication WHERE judge_id=?', [req.params.id], (err, rows, fields) => {
+				if (err) {
+					//INVALID
+					console.error(err);
+					res.sendStatus(404);
+				}else{
+					if(rows.length){
+						const query = connection.query('UPDATE authentication SET ? WHERE judge_id=?', [data, reqId], (err, result) => {
+							if(err){
+								console.log(err);
+								res.sendStatus(404);
+							}else{
+								res.status(200).jsonp({changedRows:result.changedRows, affectedRows:result.affectedRows}).end();
+							}
+						})
+						console.log(query.sql)
+					}else{
+						data["judge_id"] = reqId;
+						console.log(data);
+						const query = connection.query('INSERT INTO authentication SET ?', [data], (err, result) => {
+							if(err){
+								console.error(err);
+								res.sendStatus(404);
+							}else{
+								res.status(201);
+								//res.location('/api/panoramas/' + result.insertId);
+								res.end();
+							}
+						});
+						console.log(query.sql);
+					}
+				}
+			});
+			console.log(query.sql);
+
+
+		});
+
+	router.route('/auth/valid/:id')
+		.post((req, res) => {
+			const query = connection.query('SELECT * from authentication WHERE judge_id=? and judge_email=? and judge_password=? and judge_available=true',
+				[req.params.id, req.body["judge_email"], req.body["judge_password"]], (err, rows, fields) => {
+					if(err){
+						console.error(err);
+						res.sendStatus(404);
+					}else{
+						res.status(200).jsonp({isValid:rows.length > 0}).end();
+					}
+			});
+		});
+
+	router.route('/auth/all')
+		.get((req, res) => {
+			const query = connection.query('SELECT * from authentication', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				}else{
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+
+		// .get((req, res) => {
+		// 	const query = connection.query('SELECT * FROM panos', (err, rows, fields) => {
+		// 		if (err) console.error(err);
+		//
+		// 		res.jsonp(rows);
+		// 	});
+		// 	console.log(query.sql);
+		// })
+
+		//We do NOT do these to the collection
+		// .put((req, res) => {
+		// 	//res.status(404).send("Not Found").end();
+		// 	res.sendStatus(404);
+		// })
+		// .patch((req, res) => {
+		// 	res.sendStatus(404);
+		// })
+		// .delete((req, res) => {
+		// 	// LET's TRUNCATE TABLE..... NOT!!!!!
+		// 	res.sendStatus(404);
+		// });
+	//end route
+
 	// SPECIFIC ITEM ROUTES
 	router.route('/panoramas/:id')
 	    .post((req, res) => {

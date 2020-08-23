@@ -16,7 +16,12 @@ try{
 // Setup MySQL Connection
 const connection  = mysql.createConnection(credentials);
 // Connect to MySQL DB
-connection.connect();
+connection.connect(function (err) {
+    if (err) {
+        console.log('failed to connect db');
+    }
+});
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
