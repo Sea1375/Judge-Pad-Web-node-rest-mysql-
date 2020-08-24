@@ -149,7 +149,7 @@ module.exports = (express, connection) => {
 							if(err){
 								console.error(err);
 								res.sendStatus(404);
-							}else{
+							} else {
 								res.status(201);
 								//res.location('/api/panoramas/' + result.insertId);
 								res.end();
@@ -160,8 +160,6 @@ module.exports = (express, connection) => {
 				}
 			});
 			console.log(query.sql);
-
-
 		});
 
 	router.route('/auth/valid/:id')
@@ -189,6 +187,125 @@ module.exports = (express, connection) => {
 			});
 		});
 
+	router.route('/auth/:id')
+		.get((req, res) => {
+			const query = connection.query('SELECT * from authentication WHERE judge_id=?', [req.params.id], (err, rows, fields) => {
+				if (err) {
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/score/judge/:id')
+		.post((req, res) => {
+			const data = req.body;
+			const reqId = req.params.id;
+			console.log(data);
+			const query = connection.query('SELECT * FROM score WHERE judge_id=?', [req.params.id], (err, rows, fields) => {
+				if (err) {
+					//INVALID
+					console.error(err);
+					res.sendStatus(404);
+				}else{
+					if(rows.length){
+						const query = connection.query('UPDATE score SET ? WHERE judge_id=?', [data, reqId], (err, result) => {
+							if(err){
+								console.log(err);
+								res.sendStatus(404);
+							}else{
+								res.status(200).jsonp({changedRows:result.changedRows, affectedRows:result.affectedRows}).end();
+							}
+						})
+						console.log(query.sql)
+					}else{
+						data["judge_id"] = reqId;
+						console.log(data);
+						const query = connection.query('INSERT INTO score SET ?', [data], (err, result) => {
+							if(err){
+								console.error(err);
+								res.sendStatus(404);
+							} else {
+								res.status(201);
+								//res.location('/api/panoramas/' + result.insertId);
+								res.end();
+							}
+						});
+						console.log(query.sql);
+					}
+				}
+			});
+			console.log(query.sql);
+		});
+
+	router.route('/score/recorder/:id')
+		.post((req, res) => {
+			const data = req.body;
+			const reqId = req.params.id;
+			console.log(data);
+			const query = connection.query('SELECT * FROM score WHERE judge_id=?', [req.params.id], (err, rows, fields) => {
+				if (err) {
+					//INVALID
+					console.error(err);
+					res.sendStatus(404);
+				}else{
+					if(rows.length){
+						const query = connection.query('UPDATE score SET ? WHERE judge_id=?', [data, reqId], (err, result) => {
+							if(err){
+								console.log(err);
+								res.sendStatus(404);
+							}else{
+								res.status(200).jsonp({changedRows:result.changedRows, affectedRows:result.affectedRows}).end();
+							}
+						})
+						console.log(query.sql)
+					}else{
+						data["judge_id"] = reqId;
+						console.log(data);
+						const query = connection.query('INSERT INTO score SET ?', [data], (err, result) => {
+							if(err){
+								console.error(err);
+								res.sendStatus(404);
+							} else {
+								res.status(201);
+								//res.location('/api/panoramas/' + result.insertId);
+								res.end();
+							}
+						});
+						console.log(query.sql);
+					}
+				}
+			});
+			console.log(query.sql);
+		});
+
+	router.route('/score/all')
+		.get((req, res) => {
+			const query = connection.query('SELECT score.judge_id, score.judge_name, score.judge_score, score.message_from_judge, score.message_to_judge' +
+				' from score, authentication ' +
+				'WHERE authentication.judge_id=score.judge_id AND authentication.judge_available=true',
+				[], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				}else{
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/score/:id')
+		.get((req, res) => {
+			const query = connection.query('SELECT * from score WHERE judge_id=?',
+				[req.params.id], (err, rows, fields) => {
+					if(err){
+						console.error(err);
+						res.sendStatus(404);
+					}else{
+						res.status(200).jsonp(rows);
+					}
+				});
+		});
 		// .get((req, res) => {
 		// 	const query = connection.query('SELECT * FROM panos', (err, rows, fields) => {
 		// 		if (err) console.error(err);
@@ -267,6 +384,83 @@ module.exports = (express, connection) => {
 	        });
 	        console.log(query.sql)
 	    });
+	router.route('/judge/:id')
+		//we can use .route to then hook on multiple verbs
+		.post((req, res) => {
+			const data = req.body;
+			const reqId = req.params.id;
+			console.log(req.params.id);
+			const query = connection.query('SELECT * FROM judge WHERE id=?', [req.params.id], (err, rows, fields) => {
+				if (err) {
+					//INVALID
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					if(rows.length){
+						const query = connection.query('UPDATE judge SET ? WHERE id=?', [data, reqId], (err, result) => {
+							if(err){
+								console.log(err);
+								res.sendStatus(404);
+							}else{
+								res.status(200).jsonp({changedRows:result.changedRows, affectedRows:result.affectedRows}).end();
+							}
+						})
+						console.log(query.sql)
+					}else{
+						data["id"] = reqId;
+						const query = connection.query('INSERT INTO judge SET ?', [data], (err, result) => {
+							if(err){
+								console.error(err);
+								res.sendStatus(404);
+							} else {
+								res.status(201);
+								//res.location('/api/panoramas/' + result.insertId);
+								res.end();
+							}
+						});
+						console.log(query.sql);
+					}
+				}
+			});
+			console.log(query.sql);
+		});
+	router.route('/judges')
+		.get((req, res) => {
+			const query = connection.query('SELECT id, name, available, score, msg_from_recorder, msg_to_recorder FROM judge', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/judge/:id')
+		.get((req, res) => {
+			const query = connection.query('SELECT id, name, available, score, msg_from_recorder, msg_to_recorder ' +
+				'FROM judge WHERE id=?', [req.params.id], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/judge/:id/secret')
+		.post((req, res) => {
+			console.log(req.params.id);
+			const query = connection.query('SELECT * FROM judge WHERE id=? and email=? and password=? and available=true',
+			[req.params.id, req.body["email"], req.body["password"]], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				}else{
+					res.status(200).jsonp({isValid:rows.length > 0}).end();
+				}
+			});
+		});
+
 	//end route
 
 	return router;
