@@ -1,8 +1,13 @@
 // set constiables for app
 const express     = require('express');
+const cors        = require('cors');
 const app         = express();
 const path        = require('path');
 const bodyParser  = require('body-parser');
+
+app.use(cors({
+    origin: '*'
+}))
 
 const mysql       = require('mysql');
 let credentials;

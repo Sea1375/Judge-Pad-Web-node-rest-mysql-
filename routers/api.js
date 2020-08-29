@@ -14,7 +14,7 @@ module.exports = (express, connection) => {
 						if(rows.length > 0) {
 							res.status(200).jsonp({id: rows[0].id}).end();
 						} else {
-							res.status(200).jsonp({id: 0}).end();
+							res.status(401).end();
 						}
 					}
 				});
@@ -34,7 +34,7 @@ module.exports = (express, connection) => {
 		});
 	router.route('/judge/reset')
 		.post((req, res) => {
-			const query = connection.query('UPDATE user SET name=? and username=? and email=? and password=?' +
+			const query = connection.query('UPDATE user SET name=?, username=?, email=?, password=?' +
 				' WHERE username=? and password=?', [req.body['name'], req.body['username'], req.body['email'], req.body['password'],
 				req.body['oldUsername'], req.body['oldPassword']], (err, result) => {
 				if(err){
@@ -49,6 +49,93 @@ module.exports = (express, connection) => {
 					res.end();
 				}
 			});
+			console.log(query.sql);
+		});
+	router.route('/judge/get/name-judgeNumber-diveCode/:id')
+		.get((req, res) => {
+			const query = connection.query('SELECT user.name, judge.judgeNumber, admin.diveCode ' +
+				'FROM user, judge, admin WHERE judge.id=? and judge.userId=user.id and judge.userId=admin.userId',
+				[req.params.id], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows[0]);
+				}
+			});
+		});
+	router.route('/judge/write/:id')
+		.post((req, res) => {
+			const query = connection.query('UPDATE judge SET ? WHERE id=?', [req.body, req.params.id], (err, result) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					if(result.changedRows > 0) {
+						res.status(201).json({status: true});
+					} else {
+						res.status(201).json({status: false});
+					}
+					res.end();
+				}
+			});
+			console.log(query.sql);
+		});
+	router.route('/judge/read/all')
+		.get((req, res) => {
+			const query = connection.query('SELECT * FROM judge', [], (err, rows, fields) => {
+					if(err){
+						console.error(err);
+						res.sendStatus(404);
+					} else {
+						res.status(200).jsonp(rows);
+					}
+				});
+		});
+	router.route('/judge/read/:id/msgFromRecorder')
+		.get((req, res) => {
+			const query = connection.query('SELECT msgFromRecorder FROM judge WHERE id=?', [req.params.id], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows[0]);
+				}
+			});
+		});
+	router.route('/user/read/all')
+		.get((req, res) => {
+			const query = connection.query('SELECT * FROM user', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/judge/read/user-info')
+		.get((req, res) => {
+			const query = connection.query('SELECT judge.id, judge.userId, user.name, user.username, user.email, judge.backend ' +
+				'FROM user, judge WHERE judge.userId=user.id', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/judge/read/names-with-permission')
+		.get((req, res) => {
+			const query = connection.query('SELECT judge.id, user.name FROM user, judge WHERE judge.userId!=0 and judge.userId=user.id', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
 		});
 	router.route('/recorder/login')
 		.post((req, res) => {
@@ -60,8 +147,8 @@ module.exports = (express, connection) => {
 					}else{
 						if(rows.length > 0) {
 							const id = rows[0].id;
-							const subQuery = connection.query('SELECT userId FROM admin WHERE userId=?',
-								[id], (err, rows, fields) => {
+							const subQuery = connection.query('SELECT * FROM admin, judge WHERE admin.userId=? or (judge.backend=1 and judge.userId=?)',
+								[id,id], (err, rows, fields) => {
 									if(err){
 										console.error(err);
 										res.sendStatus(404);
@@ -76,5 +163,30 @@ module.exports = (express, connection) => {
 					}
 				});
 		});
+	router.route('/admin/diveCode')
+		.get((req, res) => {
+			const query = connection.query('SELECT diveCode FROM admin', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows[0]);
+				}
+			});
+		});
+	router.route('/admin/diveCode')
+		.post((req, res) => {
+			const query = connection.query('UPDATE admin SET diveCode=?', [req.body["diveCode"]], (err, result) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(201).json();
+					res.end();
+				}
+			});
+			console.log(query.sql);
+		});
 	return router;
+
 };
