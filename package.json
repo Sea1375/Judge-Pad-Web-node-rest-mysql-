@@ -11,10 +11,12 @@
   "license": "ISC",
   "private": true,
   "dependencies": {
+    "bcrypt": "^5.0.0",
     "body-parser": "^1.15.2",
     "cors": "^2.8.5",
     "ejs": "^2.5.2",
     "express": "^4.14.0",
+    "md5": "^2.3.0",
     "mysql": "^2.11.1"
   }
 }

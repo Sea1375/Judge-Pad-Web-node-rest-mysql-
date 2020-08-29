@@ -1,12 +1,15 @@
 //Dependencies - Express 4.x and the MySQL Connection
+const md5 = require('md5');
+
 module.exports = (express, connection) => {
 	const router      = express.Router();
 
 	//NewJudgePad
 	router.route('/judge/login/get-id')
 		.post((req, res) => {
+			const pass = md5(req.body['password']);
 			const query = connection.query('SELECT judge.id as id FROM user, judge WHERE user.username=? and user.password=? and user.id=judge.userId',
-				[req.body["username"], req.body["password"]], (err, rows, fields) => {
+				[req.body["username"], pass], (err, rows, fields) => {
 					if(err){
 						console.error(err);
 						res.sendStatus(404);
@@ -21,22 +24,33 @@ module.exports = (express, connection) => {
 		});
 	router.route('/judge/register')
 		.post((req, res) => {
+			const pass = md5('divingandjudgepad');
+			console.log(pass);
 			const query = connection.query('INSERT INTO user SET ?', [req.body], (err, result) => {
 				if(err){
 					console.error(err);
 					res.sendStatus(404);
 				} else {
-					res.status(201);
-					//res.location('/api/panoramas/' + result.insertId);
-					res.end();
+					const pass = md5(req.body['password']);
+					connection.query('UPDATE user SET password=? WHERE email=?', [pass, req.body['email']], (err, result) => {
+						if(err){
+							console.error(err);
+							res.sendStatus(404);
+						} else {
+
+							res.status(201);
+							//res.location('/api/panoramas/' + result.insertId);
+							res.end();
+						}
+					});
 				}
 			});
 		});
 	router.route('/judge/reset')
 		.post((req, res) => {
-			const query = connection.query('UPDATE user SET name=?, username=?, email=?, password=?' +
-				' WHERE username=? and password=?', [req.body['name'], req.body['username'], req.body['email'], req.body['password'],
-				req.body['oldUsername'], req.body['oldPassword']], (err, result) => {
+			const pass = md5(req.body['password']);
+			const query = connection.query('UPDATE user SET password=?' +
+				' WHERE email=?', [pass, req.body['email']], (err, result) => {
 				if(err){
 					console.error(err);
 					res.sendStatus(404);
@@ -139,8 +153,9 @@ module.exports = (express, connection) => {
 		});
 	router.route('/recorder/login')
 		.post((req, res) => {
+			const pass = md5(req.body['password']);
 			const query = connection.query('SELECT id FROM user WHERE username=? and password=?',
-				[req.body["username"], req.body["password"]], (err, rows, fields) => {
+				[req.body["username"], pass], (err, rows, fields) => {
 					if(err){
 						console.error(err);
 						res.sendStatus(404);
@@ -186,6 +201,32 @@ module.exports = (express, connection) => {
 				}
 			});
 			console.log(query.sql);
+		});
+	router.route('/judge/read/allPlusJudges')
+		.get((req, res) => {
+			const query = connection.query('SELECT id, judgeNumber, msgFromRecorder FROM judge WHERE userId!=0', [], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					res.status(200).jsonp(rows);
+				}
+			});
+		});
+	router.route('/judge/read/score/exist/:id')
+		.get((req, res) => {
+			const query = connection.query('SELECT * FROM judge WHERE score=0 and id=?', [req.params.id], (err, rows, fields) => {
+				if(err){
+					console.error(err);
+					res.sendStatus(404);
+				} else {
+					if(rows.length > 0) {
+						res.status(200).jsonp({isValid: true});
+					} else {
+						res.status(200).jsonp({isValid: false});
+					}
+				}
+			});
 		});
 	return router;
 

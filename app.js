@@ -4,6 +4,7 @@ const cors        = require('cors');
 const app         = express();
 const path        = require('path');
 const bodyParser  = require('body-parser');
+const md5         = require('md5');
 
 app.use(cors({
     origin: '*'
