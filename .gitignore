@@ -49,5 +49,6 @@ jspm_packages
 .idea
 
 ## Project specific
+.credentials.js
 
 # MySQL Credentials File
