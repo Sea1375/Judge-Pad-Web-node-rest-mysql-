@@ -38,3 +38,11 @@ INSERT INTO `judgepad`.`judge`(judgeNumber, userId, score, msgFromRecorder, msgT
 INSERT INTO `judgepad`.`judge`(judgeNumber, userId, score, msgFromRecorder, msgToRecorder, backend) VALUES('Synchro 3', 0, 0, '', '', false);
 INSERT INTO `judgepad`.`judge`(judgeNumber, userId, score, msgFromRecorder, msgToRecorder, backend) VALUES('Synchro 4', 0, 0, '', '', false);
 INSERT INTO `judgepad`.`judge`(judgeNumber, userId, score, msgFromRecorder, msgToRecorder, backend) VALUES('Synchro 5', 0, 0, '', '', false);
+
+CREATE TABLE `judgepad`.`resetlink` (
+  `id` int(5) NOT NULL AUTO_INCREMENT,
+  `userId` int(5) NOT NULL,
+  `createDate` int(10) NOT NULL,
+  `expireDate` int(2) NOT NULL,
+  `randomString` varchar(50) NOT NULL,
+PRIMARY KEY (`id`));
