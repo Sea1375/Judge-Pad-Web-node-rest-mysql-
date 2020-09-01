@@ -36,8 +36,6 @@ module.exports = (express, connection) => {
     });
   router.route('/judge/register')
     .post((req, res) => {
-      const pass = md5('divingandjudgepad');
-      console.log(pass);
       const query = connection.query('INSERT INTO user SET ?', [req.body], (err, result) => {
         if (err) {
           console.error(err);
@@ -49,10 +47,7 @@ module.exports = (express, connection) => {
               console.error(err);
               res.sendStatus(404);
             } else {
-
-              res.status(201);
-              //res.location('/api/panoramas/' + result.insertId);
-              res.end();
+              res.status(201).json({status: true}).end();
             }
           });
         }
