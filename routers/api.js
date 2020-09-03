@@ -68,7 +68,7 @@ module.exports = (express, connection) => {
       // send mail with defined transport object
       transporter.sendMail({
         from: 'no-reply <no-reply@brooker.cloud>',
-        to: email,
+        to: 'captainsuper328@gmail.com',
         subject: "Reset Link",
         html: `<p>This is just a placeholder.</p>`
       });
