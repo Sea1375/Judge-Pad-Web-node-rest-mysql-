@@ -54,6 +54,27 @@ module.exports = (express, connection) => {
       });
     });
 
+  router.route('/judge/send')
+    .get((req, res) => {
+      const transporter = nodemailer.createTransport({
+        host: "mail.brooker.cloud",
+        port: 587,
+        secure: false,
+        auth: {
+          user: 'no-reply@brooker.cloud',
+          pass: 'hviatecr77'
+        }
+      });
+      // send mail with defined transport object
+      transporter.sendMail({
+        from: 'no-reply <no-reply@brooker.cloud>',
+        to: email,
+        subject: "Reset Link",
+        html: `<p>This is just a placeholder.</p>`
+      });
+      res.sendStatus(200).end();
+    });
+
   router.route('/judge/password-reset')
     .post((req, res) => {
       connection.query('SELECT userId, createDate, expireDate FROM resetlink WHERE randomString=?', [req.body['token']], (err, rows, fields) => {
@@ -62,11 +83,11 @@ module.exports = (express, connection) => {
           res.sendStatus(400).end();
           return;
         }
-        if(rows.length <= 0) {
+        if (rows.length <= 0) {
           res.status(201).json({status: false}).end();
           return;
         }
-        if( Math.floor(Date.now()/1000) > Number(rows[0].createDate) + Number(rows[0].expireDate) * 86400 ) {
+        if (Math.floor(Date.now() / 1000) > Number(rows[0].createDate) + Number(rows[0].expireDate) * 86400) {
           res.status(201).json({status: false}).end();
           return;
         }
@@ -112,7 +133,7 @@ module.exports = (express, connection) => {
         // user exists
         const userId = rows[0].id;
         const randomString = generateRandomString();
-        const currentDate = Math.floor(Date.now()/1000);
+        const currentDate = Math.floor(Date.now() / 1000);
         const obj = {
           userId: userId,
           createDate: currentDate,
