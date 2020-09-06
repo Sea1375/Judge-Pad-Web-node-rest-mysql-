@@ -54,6 +54,18 @@ module.exports = (express, connection) => {
       });
     });
 
+  router.route('/judge/changeBackend/:id')
+    .post((req, res) => {
+      connection.query('UPDATE user SET ? WHERE id=?', [req.body, req.params.id], (err, result) => {
+        if (err) {
+          console.error(err);
+          res.sendStatus(404);
+        } else {
+          res.sendStatus(200);
+        }
+      });
+    });
+
   router.route('/judge/send')
     .get((req, res) => {
       const transporter = nodemailer.createTransport({
@@ -266,7 +278,7 @@ module.exports = (express, connection) => {
           } else {
             if (rows.length > 0) {
               const id = rows[0].id;
-              const subQuery = connection.query('SELECT * FROM admin, judge WHERE admin.userId=? or (judge.backend=1 and judge.userId=?)',
+              const subQuery = connection.query('SELECT * FROM admin, user WHERE admin.userId=? or (user.backend=1 and user.id=?)',
                 [id, id], (err, rows, fields) => {
                   if (err) {
                     console.error(err);
