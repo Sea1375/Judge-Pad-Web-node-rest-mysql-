@@ -67,23 +67,27 @@ module.exports = (express, connection) => {
     });
 
   router.route('/judge/send')
-    .get((req, res) => {
-      const transporter = nodemailer.createTransport({
-        host: "mail.brooker.cloud",
-        port: 587,
-        secure: false,
-        auth: {
-          user: 'no-reply@brooker.cloud',
-          pass: 'hviatecr77'
-        }
-      });
-      // send mail with defined transport object
-      transporter.sendMail({
-        from: 'no-reply <no-reply@brooker.cloud>',
-        to: 'captainsuper328@gmail.com',
-        subject: "Reset Link",
-        html: `<p>This is just a placeholder.</p>`
-      });
+    .get(async (req, res) => {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: "mail.brooker.cloud",
+          port: 587,
+          secure: false,
+          auth: {
+            user: 'no-reply@brooker.cloud',
+            pass: 'hviatecr77'
+          }
+        });
+        // send mail with defined transport object
+        await transporter.sendMail({
+          from: 'no-reply <no-reply@brooker.cloud>',
+          to: 'captainsuper328@gmail.com',
+          subject: "Reset Link",
+          html: `<p>This is just a placeholder.</p>`
+        });
+      } catch (e) {
+        console.log('error while sending email: ', e);
+      }
       res.sendStatus(200).end();
     });
 
