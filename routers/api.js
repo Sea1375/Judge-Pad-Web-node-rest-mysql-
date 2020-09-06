@@ -76,7 +76,8 @@ module.exports = (express, connection) => {
           auth: {
             user: 'no-reply@brooker.cloud',
             pass: 'hviatecr77'
-          }
+          },
+          tls: {rejectUnauthorized: false},
         });
         // send mail with defined transport object
         await transporter.sendMail({
