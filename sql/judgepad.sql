@@ -5,6 +5,7 @@ CREATE TABLE `judgepad`.`user` (
   `username` varchar(50) NOT NULL,
   `email` varchar(50) NOT NULL,
   `password` varchar(50) NOT NULL,
+  `backend` boolean NULL,
 PRIMARY KEY (`id`));
 
 CREATE TABLE `judgepad`.`judge` (
@@ -23,7 +24,7 @@ CREATE TABLE `judgepad`.`admin` (
 );
 
 INSERT INTO `judgepad`.`admin`(userId, diveCode) VALUES(1, '');
-INSERT INTO `judgepad`.`user`(name, username, email, password) VALUES('Christian', 'Christian', 'christianbrooker@gmail.com', 'c4508822a66a4da006bca7331b938021');
+INSERT INTO `judgepad`.`user`(name, username, email, password, backend) VALUES('Christian', 'Christian', 'christianbrooker@gmail.com', 'c4508822a66a4da006bca7331b938021', true);
 --divingandjudgepad
 
 INSERT INTO `judgepad`.`judge`(judgeNumber, userId, score, msgFromRecorder, msgToRecorder, backend) VALUES('Judge 1', 0, 0, '', '', false);
