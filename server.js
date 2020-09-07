@@ -1,4 +1,4 @@
-var http = require('https');
+var http = require('http');
 var app = require('./app');
 
 var port = process.env.PORT || 3001; 	  // set our port
