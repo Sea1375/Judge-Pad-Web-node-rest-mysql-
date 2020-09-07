@@ -175,7 +175,7 @@ module.exports = (express, connection) => {
             tls: {rejectUnauthorized: false},
           });
           // send mail with defined transport object
-          const resetLink = `http://judge.brooker.cloud/judge/password-reset/${randomString}`;
+          const resetLink = `https://judge.brooker.cloud/judge/password-reset/${randomString}`;
           transporter.sendMail({
             from: '"YourCompany" <no-reply@brooker.cloud>',
             to: email,
