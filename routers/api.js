@@ -134,7 +134,7 @@ module.exports = (express, connection) => {
   router.route('/judge/send-email')
     .post( (req, res) => {
       const email = req.body['email'];
-      connection.query('SELECT id FROM user WHERE email=?', [email], async (err, rows, fields) => {
+      connection.query('SELECT id FROM user WHERE email=?', [email], (err, rows, fields) => {
         if (err) {
           console.error(err);
           res.sendStatus(404).end();
@@ -157,28 +157,35 @@ module.exports = (express, connection) => {
           expireDate: 2,
           randomString: randomString
         };
-        try {
-          const transporter = nodemailer.createTransport({
-            host: "mail.brooker.cloud",
-            port: 587,
-            secure: false,
-            auth: {
-              user: 'no-reply@brooker.cloud',
-              pass: 'hviatecr77'
-            },
-            tls: {rejectUnauthorized: false},
-          });
-          // send mail with defined transport object
-          await transporter.sendMail({
-            from: 'no-reply <no-reply@brooker.cloud>',
-            to: 'sea.dream0000@gmail.com',
-            subject: "Reset Link",
-            html: `<p>This is just a placeholder.</p>`
-          });
-        } catch (e) {
-          console.log('error while sending email: ', e);
-        }
-        res.status(201).json({status: true}).end();
+        connection.query('INSERT INTO resetLink SET ?', [obj], async (err, result) => {
+          if (err) {
+            console.error(err);
+            res.sendStatus(400).end();
+            return;
+          }
+          try {
+            const transporter = nodemailer.createTransport({
+              host: "mail.brooker.cloud",
+              port: 587,
+              secure: false,
+              auth: {
+                user: 'no-reply@brooker.cloud',
+                pass: 'hviatecr77'
+              },
+              tls: {rejectUnauthorized: false},
+            });
+            // send mail with defined transport object
+            await transporter.sendMail({
+              from: 'no-reply <no-reply@brooker.cloud>',
+              to: 'sea.dream0000@gmail.com',
+              subject: "Reset Link",
+              html: `<p>This is just a placeholder.</p>`
+            });
+          } catch (e) {
+            console.log('error while sending email: ', e);
+          }
+          res.status(201).json({status: true}).end();
+        });
       });
     });
 
