@@ -132,33 +132,7 @@ module.exports = (express, connection) => {
     });
 
   router.route('/judge/send-email')
-    .post( (req, res) => {
-      const email = req.body['email'];
-      connection.query('SELECT id FROM user WHERE email=?', [email], async (err, rows, fields) => {
-        if (err) {
-          console.error(err);
-          res.sendStatus(404).end();
-          return;
-        }
-
-        // user does not exist
-        if (rows.length === 0) {
-          res.status(400).json({status: false}).end();
-          return;
-        }
-
-        // user exists
-        const userId = rows[0].id;
-        const randomString = generateRandomString();
-        const currentDate = Math.floor(Date.now() / 1000);
-        const obj = {
-          userId: userId,
-          createDate: currentDate,
-          expireDate: 2,
-          randomString: randomString
-        };
-
-
+    .post(async (req, res) => {
           try {
             const transporter = nodemailer.createTransport({
               host: "mail.brooker.cloud",
@@ -180,8 +154,6 @@ module.exports = (express, connection) => {
           } catch (e) {
             console.log('error while sending email: ', e);
           }
-          res.sendStatus(200).end();
-        });
         res.status(201).json({status: true}).end();
     });
 
