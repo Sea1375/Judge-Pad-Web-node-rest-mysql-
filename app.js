@@ -47,7 +47,7 @@ const apiRouter = require('./routers/api')(express, connection);
 
 // Apply Routes to App
 // All of these routes will be prefixed with /api
-app.use('/', apiRouter);
+app.use('/api', apiRouter);
 
 // non api route for our views
 app.get('/', (req, res) => {

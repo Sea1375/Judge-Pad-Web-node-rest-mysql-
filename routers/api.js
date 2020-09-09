@@ -157,7 +157,7 @@ module.exports = (express, connection) => {
           expireDate: 2,
           randomString: randomString
         };
-        connection.query('INSERT INTO resetLink SET ?', [obj], async (err, result) => {
+        connection.query('INSERT INTO resetlink SET ?', [obj], async (err, result) => {
           if (err) {
             console.error(err);
             res.sendStatus(400).end();
