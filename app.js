@@ -4,7 +4,6 @@ const cors        = require('cors');
 const app         = express();
 const path        = require('path');
 const bodyParser  = require('body-parser');
-const md5         = require('md5');
 
 app.use(cors({
     origin: '*'
@@ -48,7 +47,7 @@ const apiRouter = require('./routers/api')(express, connection);
 
 // Apply Routes to App
 // All of these routes will be prefixed with /api
-app.use('/', apiRouter);
+app.use('/api', apiRouter);
 
 // non api route for our views
 app.get('/', (req, res) => {

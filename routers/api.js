@@ -20,8 +20,8 @@ module.exports = (express, connection) => {
   router.route('/judge/login/get-id')
     .post((req, res) => {
       const pass = md5(req.body['password']);
-      const query = connection.query('SELECT judge.id as id FROM user, judge WHERE user.username=? and user.password=? and user.id=judge.userId',
-        [req.body["username"], pass], (err, rows, fields) => {
+      connection.query('SELECT judge.id as id FROM user, judge WHERE user.username=? and user.password=? and user.id=judge.userId',
+        [req.body["username"], pass], (err, rows) => {
           if (err) {
             console.error(err);
             res.sendStatus(404);
@@ -36,7 +36,7 @@ module.exports = (express, connection) => {
     });
   router.route('/judge/register')
     .post((req, res) => {
-      const query = connection.query('INSERT INTO user SET ?', [req.body], (err, result) => {
+      connection.query('INSERT INTO user SET ?', [req.body], (err, result) => {
         if (err) {
           console.error(err);
           res.sendStatus(404);
@@ -54,24 +54,41 @@ module.exports = (express, connection) => {
       });
     });
 
-  router.route('/judge/send')
-    .get((req, res) => {
-      const transporter = nodemailer.createTransport({
-        host: "mail.brooker.cloud",
-        port: 587,
-        secure: false,
-        auth: {
-          user: 'no-reply@brooker.cloud',
-          pass: 'hviatecr77'
+  router.route('/judge/changeBackend/:id')
+    .post((req, res) => {
+      connection.query('UPDATE user SET ? WHERE id=?', [req.body, req.params.id], (err, result) => {
+        if (err) {
+          console.error(err);
+          res.sendStatus(404);
+        } else {
+          res.sendStatus(200);
         }
       });
-      // send mail with defined transport object
-      transporter.sendMail({
-        from: 'no-reply <no-reply@brooker.cloud>',
-        to: email,
-        subject: "Reset Link",
-        html: `<p>This is just a placeholder.</p>`
-      });
+    });
+
+  router.route('/judge/send')
+    .get(async (req, res) => {
+      try {
+        const transporter = nodemailer.createTransport({
+          host: "mail.brooker.cloud",
+          port: 587,
+          secure: false,
+          auth: {
+            user: 'no-reply@brooker.cloud',
+            pass: 'hviatecr77'
+          },
+          tls: {rejectUnauthorized: false},
+        });
+        // send mail with defined transport object
+        await transporter.sendMail({
+          from: 'no-reply <no-reply@brooker.cloud>',
+          to: 'captainsuper328@gmail.com',
+          subject: "Reset Link",
+          html: `<p>This is just a placeholder.</p>`
+        });
+      } catch (e) {
+        console.log('error while sending email: ', e);
+      }
       res.sendStatus(200).end();
     });
 
@@ -154,7 +171,8 @@ module.exports = (express, connection) => {
             auth: {
               user: 'no-reply@brooker.cloud',
               pass: 'hviatecr77'
-            }
+            },
+            tls: {rejectUnauthorized: false},
           });
           // send mail with defined transport object
           const resetLink = `http://judge.brooker.cloud/judge/password-reset/${randomString}`;
@@ -266,7 +284,7 @@ module.exports = (express, connection) => {
           } else {
             if (rows.length > 0) {
               const id = rows[0].id;
-              const subQuery = connection.query('SELECT * FROM admin, judge WHERE admin.userId=? or (judge.backend=1 and judge.userId=?)',
+              const subQuery = connection.query('SELECT * FROM admin, user WHERE admin.userId=? or (user.backend=1 and user.id=?)',
                 [id, id], (err, rows, fields) => {
                   if (err) {
                     console.error(err);
