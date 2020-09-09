@@ -254,6 +254,17 @@ module.exports = (express, connection) => {
         }
       });
     });
+  router.route('/user/delete/:id')
+    .get((req, res) => {
+      connection.query('DELETE FROM user WHERE id=?', [req.params.id], (err, result) => {
+        if (err) {
+          console.log(err);
+          res.sendStatus(404);
+        } else {
+          res.status(201).json({status: true}).end();
+        }
+      });
+    });
   router.route('/judge/read/user-info')
     .get((req, res) => {
       const query = connection.query('SELECT judge.id, judge.userId, user.name, user.username, user.email, judge.backend ' +
