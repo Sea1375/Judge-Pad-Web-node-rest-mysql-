@@ -134,7 +134,7 @@ module.exports = (express, connection) => {
   router.route('/judge/send-email')
     .post( (req, res) => {
       const email = req.body['email'];
-      connection.query('SELECT id FROM user WHERE email=?', [email], (err, rows, fields) => {
+      connection.query('SELECT id FROM user WHERE email=?', [email], async (err, rows, fields) => {
         if (err) {
           console.error(err);
           res.sendStatus(404).end();
@@ -158,12 +158,7 @@ module.exports = (express, connection) => {
           randomString: randomString
         };
 
-        connection.query('INSERT INTO resetLink SET ?', [obj], async (err, result) => {
-          if (err) {
-            console.error(err);
-            res.sendStatus(400).end();
-            return;
-          }
+
           try {
             const transporter = nodemailer.createTransport({
               host: "mail.brooker.cloud",
@@ -188,7 +183,6 @@ module.exports = (express, connection) => {
           res.sendStatus(200).end();
         });
         res.status(201).json({status: true}).end();
-      });
     });
 
   router.route('/judge/get/name-judgeNumber-diveCode/:id')
